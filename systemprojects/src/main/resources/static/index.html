@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Project Management System</h1>
+            <div id="auth-section">
+                <button id="logout-btn" style="display: none;">Logout</button>
+            </div>
+        </header>
+
+        <!-- Login/Register Section -->
+        <div id="login-section" class="section">
+            <h2>Login / Register</h2>
+            <div class="form-container">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="email" placeholder="Email (for registration)" >
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <div class="button-group">
+                    <button id="login-btn" class="btn btn-primary">Login</button>
+                    <button id="register-btn" class="btn btn-secondary">Register</button>
+                </div>
+                <div id="auth-message" class="message"></div>
+            </div>
+        </div>
+
+        <!-- Projects Section -->
+        <div id="projects-section" class="section" style="display: none;">
+            <h2>My Projects</h2>
+            
+            <!-- Create Project Form -->
+            <div class="form-container">
+                <h3>Create New Project</h3>
+                <div class="form-group">
+                    <input type="text" id="project-name" placeholder="Project Name" required>
+                </div>
+                <button id="create-project-btn" class="btn btn-primary">Create Project</button>
+                <div id="project-message" class="message"></div>
+            </div>
+
+            <!-- Projects List -->
+            <div id="projects-list" class="list-container">
+                <h3>Projects</h3>
+                <div id="projects-items"></div>
+            </div>
+        </div>
+
+        <!-- Tasks Section -->
+        <div id="tasks-section" class="section" style="display: none;">
+            <h2>Tasks for <span id="current-project-name"></span></h2>
+            <button id="back-to-projects-btn" class="btn btn-secondary">Back to Projects</button>
+
+            <!-- Create Task Form -->
+            <div class="form-container">
+                <h3>Create New Task</h3>
+                <div class="form-group">
+                    <input type="text" id="task-title" placeholder="Task Title" required>
+                </div>
+                <button id="create-task-btn" class="btn btn-primary">Create Task</button>
+                <div id="task-message" class="message"></div>
+            </div>
+
+            <!-- Tasks List -->
+            <div id="tasks-list" class="list-container">
+                <h3>Tasks</h3>
+                <div id="tasks-items"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
