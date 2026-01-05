@@ -1,7 +1,32 @@
--- Script de inicialización con datos de prueba
--- Este script se puede ejecutar manualmente después de que la aplicación cree las tablas
+-- Esquema de Base de Datos y Datos de Prueba
 
--- Nota: Las contraseñas están hasheadas con BCrypt
+-- Crear tablas
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+    id UUID PRIMARY KEY,
+    owner_id UUID NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (owner_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+    id UUID PRIMARY KEY,
+    project_id UUID NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    completed BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (project_id) REFERENCES projects(id)
+);
+
+-- Datos de prueba
 -- Contraseña original para todos los usuarios: "password123"
 
 -- Usuario de prueba 1

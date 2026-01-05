@@ -6,8 +6,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -18,6 +22,7 @@ import java.util.Arrays;
 
 /**
  * Security configuration for JWT authentication.
+ * Optimized for Spring Boot 3.5+ and Swagger.
  */
 @Configuration
 @EnableWebSecurity
@@ -36,11 +41,21 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/", "/index.html", "/static/**", "/css/**", "/js/**").permitAll()
-                        // GET endpoints are public for reading
+                        // Combined public matchers for better performance and reliability
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/",
+                                "/index.html",
+                                "/static/**",
+                                "/css/**",
+                                "/js/**",
+                                "/favicon.ico")
+                        .permitAll()
+                        // Public GET access for projects and tasks
                         .requestMatchers(HttpMethod.GET, "/api/projects/**", "/api/tasks/**").permitAll()
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
@@ -52,6 +67,17 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        // Prevents the "using generated security password" warning
+        UserDetails user = User.builder()
+                .username("admin")
+                .password(passwordEncoder().encode("admin"))
+                .roles("ADMIN")
+                .build();
+        return new InMemoryUserDetailsManager(user);
     }
 
     @Bean
