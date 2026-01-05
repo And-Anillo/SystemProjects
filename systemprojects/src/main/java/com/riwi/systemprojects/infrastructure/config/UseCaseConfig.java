@@ -1,8 +1,8 @@
 package com.riwi.systemprojects.infrastructure.config;
 
-import com.riwi.systemprojects.application.port.in.*;
-import com.riwi.systemprojects.application.port.out.*;
-import com.riwi.systemprojects.application.usecase.*;
+import com.riwi.systemprojects.domain.ports.in.*;
+import com.riwi.systemprojects.domain.ports.out.*;
+import com.riwi.systemprojects.application.services.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,7 +15,7 @@ public class UseCaseConfig {
 
     @Bean
     public CreateProjectUseCase createProjectUseCase(ProjectRepositoryPort projectRepository) {
-        return new CreateProjectUseCaseImpl(projectRepository);
+        return new CreateProjectService(projectRepository);
     }
 
     @Bean
@@ -24,7 +24,7 @@ public class UseCaseConfig {
             CurrentUserPort currentUserPort,
             AuditLogPort auditLogPort,
             NotificationPort notificationPort) {
-        return new ActivateProjectUseCaseImpl(projectRepository, currentUserPort, auditLogPort, notificationPort);
+        return new ActivateProjectService(projectRepository, currentUserPort, auditLogPort, notificationPort);
     }
 
     @Bean
@@ -32,7 +32,7 @@ public class UseCaseConfig {
             TaskRepositoryPort taskRepository,
             ProjectRepositoryPort projectRepository,
             CurrentUserPort currentUserPort) {
-        return new CreateTaskUseCaseImpl(taskRepository, projectRepository, currentUserPort);
+        return new CreateTaskService(taskRepository, projectRepository, currentUserPort);
     }
 
     @Bean
@@ -42,7 +42,7 @@ public class UseCaseConfig {
             CurrentUserPort currentUserPort,
             AuditLogPort auditLogPort,
             NotificationPort notificationPort) {
-        return new CompleteTaskUseCaseImpl(taskRepository, projectRepository, currentUserPort, auditLogPort,
+        return new CompleteTaskService(taskRepository, projectRepository, currentUserPort, auditLogPort,
                 notificationPort);
     }
 
@@ -50,11 +50,11 @@ public class UseCaseConfig {
     public GetProjectsUseCase getProjectsUseCase(
             ProjectRepositoryPort projectRepository,
             CurrentUserPort currentUserPort) {
-        return new GetProjectsUseCaseImpl(projectRepository, currentUserPort);
+        return new GetProjectsService(projectRepository, currentUserPort);
     }
 
     @Bean
     public GetTasksUseCase getTasksUseCase(TaskRepositoryPort taskRepository) {
-        return new GetTasksUseCaseImpl(taskRepository);
+        return new GetTasksService(taskRepository);
     }
 }
