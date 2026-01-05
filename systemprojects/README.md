@@ -1,316 +1,107 @@
-# Project Management System
+# Sistema de Gestion de Proyectos y Tareas
 
-Sistema de gestión de proyectos y tareas desarrollado con **Clean Architecture** y **Hexagonal Architecture (Ports & Adapters)** usando Spring Boot 3 y Java 17.
+Este proyecto implementa un sistema backend para la gestion de proyectos y tareas, desarrollado bajo los principios de Clean Architecture y Hexagonal Architecture (Ports & Adapters) utilizando Java 17 y Spring Boot 3.
 
-## 🏗️ Arquitectura
+## Vision General
 
-El proyecto implementa **Clean Architecture** con enfoque **Hexagonal (Ports & Adapters)**:
+El objetivo principal es proporcionar una API REST robusta, mantenible y desacoplada de frameworks en su nucleo de negocio. El sistema permite la creacion de usuarios, gestion de proyectos y seguimiento de tareas, garantizando reglas de negocio estrictas como la integridad de activacion de proyectos y permisos de propiedad.
 
-```
+## Arquitectura
+
+El proyecto sigue una estructura estricta de capas concentricas, garantizando que las dependencias fluyan unicamente hacia el interior (hacia el Dominio).
+
+### Estructura de Directorios
+
 src/main/java/com/riwi/systemprojects/
-├── domain/                    # Capa de Dominio (sin dependencias de frameworks)
-│   ├── model/                # Entidades de negocio (User, Project, Task)
-│   └── exception/            # Excepciones de dominio
-├── application/              # Capa de Aplicación
-│   ├── port/
-│   │   ├── in/              # Puertos de entrada (Use Cases interfaces)
-│   │   └── out/             # Puertos de salida (Repository, Audit, Notification)
-│   └── usecase/             # Implementación de casos de uso
-├── infrastructure/           # Capa de Infraestructura
-│   ├── adapter/
-│   │   └── out/
-│   │       ├── persistence/ # Adaptador JPA
-│   │       ├── audit/       # Adaptador de auditoría
-│   │       ├── notification/# Adaptador de notificaciones
-│   │       └── security/    # Adaptador de seguridad
-│   └── config/              # Configuraciones (Security, Swagger, Use Cases)
-└── presentation/            # Capa de Presentación
-    └── rest/
-        ├── controller/      # REST Controllers
-        ├── dto/            # Data Transfer Objects
-        └── mapper/         # Mappers DTO <-> Domain
-```
-
-### Principios Aplicados
-
-- ✅ **Independencia del dominio**: El dominio no depende de Spring, JPA ni frameworks
-- ✅ **Inversión de dependencias**: Las dependencias apuntan hacia el dominio
-- ✅ **Separación de responsabilidades**: Cada capa tiene una responsabilidad clara
-- ✅ **Testeable**: Los casos de uso se prueban sin levantar el contexto de Spring
-
-## 🚀 Tecnologías
-
-- **Java 17**
-- **Spring Boot 3.5.9**
-- **Spring Security + JWT**
-- **Spring Data JPA**
-- **PostgreSQL**
-- **Swagger/OpenAPI**
-- **JUnit 5 + Mockito**
-- **Docker & Docker Compose**
-- **Frontend**: HTML + JavaScript (Vanilla)
-
-## 📋 Funcionalidades
-
-### Autenticación
-- ✅ Registro de usuarios
-- ✅ Login con JWT
-- ✅ Protección de endpoints con JWT
-
-### Proyectos
-- ✅ Crear proyectos (estado inicial: DRAFT)
-- ✅ Listar proyectos del usuario autenticado
-- ✅ Activar proyectos (solo si tienen al menos una tarea activa)
-
-### Tareas
-- ✅ Crear tareas para un proyecto
-- ✅ Listar tareas de un proyecto
-- ✅ Completar tareas
-
-### Reglas de Negocio
-1. ✅ Un proyecto solo puede activarse si tiene al menos una tarea activa
-2. ✅ Solo el propietario puede modificar un proyecto o sus tareas
-3. ✅ Una tarea completada no puede modificarse
-4. ✅ Todas las eliminaciones son lógicas (soft delete)
-5. ✅ La activación de proyectos y finalización de tareas generan auditoría
-6. ✅ La activación de proyectos y finalización de tareas generan notificación
-
-## 🔧 Instalación y Ejecución
-
-### Opción 1: Con Docker Compose (Recomendado)
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/And-Anillo/SystemProjects.git
-cd SystemProjects/systemprojects
-
-# Ejecutar con Docker Compose
-docker compose up --build
-```
-
-La aplicación estará disponible en:
-- **Backend API**: http://localhost:8080
-- **Frontend**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
-
-### Opción 2: Ejecución Local
-
-#### Requisitos
-- Java 17+
-- Maven 3.6+
-- PostgreSQL 12+
-
-#### Pasos
-
-1. **Configurar la base de datos**
-
-```sql
-CREATE DATABASE projectsdb;
-```
-
-2. **Configurar application.properties** (ya está configurado por defecto)
+├── domain/                                     # NUCLEO: Java puro, sin frameworks
+│   ├── model/                                  # Entidades del dominio (User, Project, Task)
+│   ├── exception/                              # Excepciones de negocio
+│   └── ports/                                  # CONTRATOS (Interfaces)
+│       ├── in/                                 # Casos de Uso (Input Ports)
+│       └── out/                                # Puertos de Salida (Output Ports)
+├── application/                                # APLICACION: Orquestacion
+│   └── services/                               # Implementacion de Casos de Uso
+└── infrastructure/                             # INFRAESTRUCTURA: Adaptadores y Config
+    ├── adapters/
+    │   ├── input/                              # Driving Adapters (REST Controllers)
+    │   └── output/                             # Driven Adapters (Persistence, Security, etc.)
+    └── config/                                 # Configuracion de Spring
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/projectsdb
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-```
+### Decisiones de Diseno
 
-3. **Ejecutar la aplicación**
+1.  **Pureza del Dominio**: El paquete `domain` no tiene dependencias de Spring Boot, JPA ni Hibernate. Solo contiene logica de negocio pura.
+2.  **Puertos y Adaptadores**:
+    *   **Puertos (Interfaces)**: Definen los contratos en el Dominio.
+    *   **Adaptadores (Implementaciones)**: Residen en Infraestructura e implementan los puertos de salida (ej. `JpaProjectRepository`) o usan los puertos de entrada (ej. `ProjectController`).
+3.  **Inversion de Dependencias**: La capa de Aplicacion depende de abstracciones (Puertos), no de implementaciones concretas.
 
-```bash
-./mvnw spring-boot:run
-```
+## Tecnologias
 
-## 🧪 Pruebas Unitarias
+*   **Lenguaje**: Java 17
+*   **Framework**: Spring Boot 3.5.9
+*   **Base de Datos**: PostgreSQL 15
+*   **Seguridad**: Spring Security + JWT (JSON Web Tokens)
+*   **Pruebas**: JUnit 5, Mockito, H2 Database (para entorno de test)
+*   **Documentacion API**: Springdoc OpenAPI (Swagger UI)
+*   **Contenedores**: Docker, Docker Compose
 
-El proyecto incluye pruebas unitarias para los casos de uso críticos:
+## Reglas de Negocio
 
-```bash
-# Ejecutar todas las pruebas
-./mvnw test
+El sistema hace cumplir estrictamente las siguientes reglas:
 
-# Ejecutar solo las pruebas de casos de uso
-./mvnw test -Dtest=ActivateProjectUseCaseTest,CompleteTaskUseCaseTest
-```
+1.  **Activacion de Proyectos**: Un proyecto solo puede cambiar su estado a ACTIVO si tiene asociada al menos una tarea activa.
+2.  **Propiedad**: Solo el usuario creador (propietario) de un proyecto puede modificarlo o gestionar sus tareas.
+3.  **Inmutabilidad de Tareas Completadas**: Una tarea marcada como completada no puede ser modificada.
+4.  **Eliminacion Logica**: Los recursos no se eliminan fisicamente de la base de datos; se utiliza un indicador de `deleted`.
 
-### Pruebas Implementadas
+## Instalacion y Ejecucion
 
-1. ✅ `ActivateProject_WithTasks_ShouldSucceed`
-2. ✅ `ActivateProject_WithoutTasks_ShouldFail`
-3. ✅ `ActivateProject_ByNonOwner_ShouldFail`
-4. ✅ `CompleteTask_AlreadyCompleted_ShouldFail`
-5. ✅ `CompleteTask_ShouldGenerateAuditAndNotification`
+### Prerrequisitos
+*   Docker y Docker Compose instalados.
+*   Java 17 JDK (opcional si se usa Docker).
 
-## 📡 API Endpoints
+### Ejecucion con Docker (Recomendado)
 
-### Autenticación
+El proyecto incluye una configuracion de Docker Compose que levanta la aplicacion, la base de datos y carga datos iniciales de prueba.
 
-```http
-POST /api/auth/register
-Content-Type: application/json
+1.  Clone el repositorio.
+2.  Ejecute el siguiente comando en la raiz del proyecto:
 
-{
-  "username": "testuser",
-  "email": "test@example.com",
-  "password": "password123"
-}
-```
+    docker compose up --build
 
-```http
-POST /api/auth/login
-Content-Type: application/json
+3.  La aplicacion estara disponible en el puerto 8080.
 
-{
-  "username": "testuser",
-  "password": "password123"
-}
-```
+### Datos Iniciales
+Al iniciar con Docker, se cargan automaticamente los siguientes usuarios de prueba:
+*   **Admin**: admin / password123
+*   **User1**: user1 / password123
 
-### Proyectos
+## Documentacion de la API
 
-```http
-# Crear proyecto
-POST /api/projects
-Authorization: Bearer {token}
-Content-Type: application/json
+La documentacion interactiva de OpenAPI (Swagger) esta disponible en:
 
-{
-  "name": "My Project"
-}
+    http://localhost:8080/swagger-ui.html
 
-# Listar proyectos
-GET /api/projects
-Authorization: Bearer {token}
+### Endpoints Principales
 
-# Activar proyecto
-PATCH /api/projects/{id}/activate
-Authorization: Bearer {token}
-```
+#### Autenticacion
+*   `POST /api/auth/register`: Registro de nuevos usuarios.
+*   `POST /api/auth/login`: Inicio de sesion (retorna JWT).
 
-### Tareas
+#### Proyectos
+*   `GET /api/projects`: Listar proyectos del usuario autenticado.
+*   `POST /api/projects`: Crear nuevo proyecto (Estado inicial: DRAFT).
+*   `PATCH /api/projects/{id}/activate`: Activar proyecto (requiere tareas).
 
-```http
-# Crear tarea
-POST /api/projects/{projectId}/tasks
-Authorization: Bearer {token}
-Content-Type: application/json
+#### Tareas
+*   `GET /api/projects/{projectId}/tasks`: Listar tareas de un proyecto.
+*   `POST /api/projects/{projectId}/tasks`: Crear tarea.
+*   `PATCH /api/tasks/{id}/complete`: Marcar tarea como completada.
 
-{
-  "title": "My Task"
-}
+## Pruebas
 
-# Listar tareas de un proyecto
-GET /api/projects/{projectId}/tasks
-Authorization: Bearer {token}
+El proyecto cuenta con una suite de pruebas unitarias para validar la logica de negocio y los casos de uso. Para ejecutarlas:
 
-# Completar tarea
-PATCH /api/tasks/{id}/complete
-Authorization: Bearer {token}
-```
+    ./mvnw test
 
-## 🔐 Credenciales de Prueba
-
-Puedes crear un usuario nuevo mediante el endpoint `/api/auth/register` o usar el frontend.
-
-**Ejemplo de usuario de prueba:**
-- Username: `admin`
-- Email: `admin@example.com`
-- Password: `admin123`
-
-(Debes registrarlo primero usando el endpoint de registro)
-
-## 📚 Documentación de la API
-
-La documentación completa de la API está disponible en **Swagger UI**:
-
-```
-http://localhost:8080/swagger-ui.html
-```
-
-Desde Swagger puedes:
-- Ver todos los endpoints disponibles
-- Probar los endpoints directamente
-- Autenticarte con JWT usando el botón "Authorize"
-
-## 🎨 Frontend
-
-El frontend es una aplicación simple en **HTML + JavaScript** que consume la API REST.
-
-**Funcionalidades:**
-- Login y registro de usuarios
-- Listar proyectos del usuario
-- Crear nuevos proyectos
-- Activar proyectos
-- Ver tareas de un proyecto
-- Crear nuevas tareas
-- Completar tareas
-
-**Acceso:** http://localhost:8080
-
-## 🏛️ Decisiones Técnicas
-
-### 1. Clean Architecture + Hexagonal
-- **Dominio puro**: Las entidades de dominio no tienen anotaciones de JPA
-- **Puertos y Adaptadores**: Interfaces definen contratos, adaptadores implementan
-- **Inversión de dependencias**: Todo apunta hacia el dominio
-
-### 2. Seguridad
-- **JWT**: Tokens con expiración de 24 horas
-- **BCrypt**: Hash de contraseñas
-- **Autorización**: Solo el propietario puede modificar sus recursos
-
-### 3. Persistencia
-- **JPA Entities separadas**: Mapeo entre entidades JPA y modelos de dominio
-- **Soft Delete**: Eliminaciones lógicas con flag `deleted`
-- **UUID**: Identificadores únicos universales
-
-### 4. Auditoría y Notificaciones
-- **Logging**: Implementación simple con SLF4J
-- **Extensible**: Fácil reemplazar por servicios externos (email, SMS, etc.)
-
-### 5. Testing
-- **Unit Tests**: Pruebas de casos de uso sin Spring context
-- **Mockito**: Mocking de dependencias
-- **Cobertura**: Enfoque en reglas de negocio críticas
-
-### 6. Docker
-- **Multi-stage build**: Optimización del tamaño de imagen
-- **Health checks**: Garantiza que la DB esté lista antes de iniciar la app
-- **Networking**: Comunicación entre contenedores
-
-## 📝 Modelo de Datos
-
-```
-User
-├── id (UUID)
-├── username (unique)
-├── email (unique)
-└── password (encrypted)
-
-Project
-├── id (UUID)
-├── ownerId (UUID) → User
-├── name
-├── status (DRAFT | ACTIVE)
-└── deleted (boolean)
-
-Task
-├── id (UUID)
-├── projectId (UUID) → Project
-├── title
-├── completed (boolean)
-└── deleted (boolean)
-```
-
-## 🤝 Contribución
-
-Este proyecto fue desarrollado como una demostración de Clean Architecture y Hexagonal Architecture con Spring Boot.
-
-## 📄 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
-
----
-
-**Desarrollado con ❤️ usando Clean Architecture y Hexagonal Architecture**
+Se utiliza una base de datos H2 en memoria para garantizar la independencia del entorno de ejecucion.
